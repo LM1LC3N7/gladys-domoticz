@@ -1,0 +1,11 @@
+{
+  "status": "OK",
+  "title": "GetConfig",
+  "version": "2026.4",
+  "TempSign": "C",
+  "TempScale": 1.0,
+  "WindSign": "m/s",
+  "WindScale": 1.0,
+  "language": "en",
+  "CurrencySign": "\u20ac"
+}

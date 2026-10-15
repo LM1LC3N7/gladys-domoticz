@@ -1,177 +1,142 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "Domoticz bridge",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "The devices of your Domoticz in Gladys: lights, shutters, thermostats, sensors, meters…",
+    "fr": "Les appareils de votre Domoticz dans Gladys : lumières, volets, thermostats, capteurs…"
   },
-  "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
+  "version": "0.1.0",
+  "docker_image": "ghcr.io/lm1lc3n7/gladys-domoticz:0.1.0",
   "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "cover_image": "https://raw.githubusercontent.com/LM1LC3N7/gladys-domoticz/main/cover.png",
+  "categories": ["protocols", "lighting", "climate"],
+  "transports": ["local"],
   "config_schema": [
     {
       "key": "intro",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
+      "label": {
+        "en": "Your Domoticz devices in Gladys",
+        "fr": "Vos appareils Domoticz dans Gladys"
+      },
       "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+        "en": "Every used device of your Domoticz is offered in the Discovery tab: lights, dimmers and colour bulbs, switches, shutters, locks, selectors, thermostats, temperature, humidity and weather sensors, energy, water and gas meters, motion, door and smoke sensors, push buttons. The states follow Domoticz within seconds and Gladys controls the devices through Domoticz, which keeps running: migrate at your pace, or use both side by side. Type the address of Domoticz as seen from the Gladys machine: its LAN IP address and port, not localhost. Unofficial, not affiliated with Domoticz.",
+        "fr": "Chaque appareil utilisé de votre Domoticz est proposé dans l'onglet Découverte : lumières, variateurs et ampoules couleur, interrupteurs, volets, serrures, sélecteurs, thermostats, capteurs de température, d'humidité et météo, compteurs d'énergie, d'eau et de gaz, détecteurs de mouvement, d'ouverture et de fumée, boutons poussoirs. Les états suivent Domoticz en quelques secondes et Gladys pilote les appareils à travers Domoticz, qui continue de tourner : migrez à votre rythme, ou utilisez les deux côte à côte. Saisissez l'adresse de Domoticz vue depuis la machine Gladys : son IP sur le réseau local et son port, pas localhost. Non officiel, sans lien avec Domoticz."
       },
       "links": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "url": "https://github.com/LM1LC3N7/gladys-domoticz/blob/main/docs/fr.md",
+          "label": { "en": "Guide (French)", "fr": "Guide (français)" }
+        },
+        {
+          "url": "https://github.com/LM1LC3N7/gladys-domoticz/blob/main/docs/en.md",
+          "label": { "en": "Guide (English)", "fr": "Guide (anglais)" }
+        },
+        {
+          "url": "https://wiki.domoticz.com/Domoticz_API/JSON_URL%27s",
+          "label": { "en": "The Domoticz API", "fr": "L'API de Domoticz (anglais)" }
         }
       ]
     },
     {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
+      "key": "domoticz_url",
+      "type": "string",
+      "label": { "en": "Address of Domoticz", "fr": "Adresse de Domoticz" },
       "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
+        "en": "The address you open Domoticz with, port included: http://192.168.1.20:8080 or https://domoticz.lan. A bare IP address means http://.",
+        "fr": "L'adresse avec laquelle vous ouvrez Domoticz, port compris : http://192.168.1.20:8080 ou https://domoticz.lan. Une adresse IP seule vaut http://."
       },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
-      "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
+      "placeholder": { "en": "http://192.168.1.20:8080", "fr": "http://192.168.1.20:8080" },
+      "required": true
     },
     {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
+      "key": "sign_in",
+      "type": "section",
+      "label": { "en": "Signing in to Domoticz", "fr": "Identification auprès de Domoticz" },
       "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
-      },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
-      "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
+        "en": "Recent Domoticz versions ask every client to sign in. Best: an access token, created in Setup → More Options → Access Tokens with the \"User\" rights or more. Otherwise a Domoticz user and its password. Leave all three empty only if the Gladys machine is in the trusted networks of Domoticz (Setup → Settings → Security).",
+        "fr": "Les versions récentes de Domoticz demandent à chaque client de s'identifier. Le mieux : un jeton d'accès, créé dans Configuration → Plus d'options → Access Tokens avec les droits « Utilisateur » ou plus. Sinon un utilisateur Domoticz et son mot de passe. Laissez les trois vides seulement si la machine Gladys fait partie des réseaux de confiance de Domoticz (Configuration → Paramètres → Sécurité)."
+      }
     },
     {
-      "key": "unit",
-      "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
+      "key": "access_token",
+      "type": "secret",
+      "label": { "en": "Access token", "fr": "Jeton d'accès" },
+      "description": {
+        "en": "Shown once by Domoticz when you create it: paste it here. When set, the user and password below are not used.",
+        "fr": "Affiché une seule fois par Domoticz à sa création : collez-le ici. S'il est rempli, l'utilisateur et le mot de passe ci-dessous ne servent pas."
+      },
+      "required": false
+    },
+    {
+      "key": "username",
+      "type": "string",
+      "label": { "en": "User name", "fr": "Nom d'utilisateur" },
+      "description": {
+        "en": "A Domoticz user with the \"User\" rights or more (Setup → Users), without two-factor authentication.",
+        "fr": "Un utilisateur Domoticz avec les droits « Utilisateur » ou plus (Configuration → Utilisateurs), sans double authentification."
+      },
+      "required": false
+    },
+    {
+      "key": "password",
+      "type": "secret",
+      "label": { "en": "Password", "fr": "Mot de passe" },
+      "required": false
+    },
+    {
+      "key": "verify_certificate",
+      "type": "boolean",
+      "label": {
+        "en": "Verify the TLS certificate (https)",
+        "fr": "Vérifier le certificat TLS (https)"
+      },
+      "description": {
+        "en": "Turn off only for a Domoticz with a self-signed certificate on your local network (the one of a default install).",
+        "fr": "À désactiver seulement pour un Domoticz au certificat auto-signé sur votre réseau local (celui d'une installation par défaut)."
+      },
       "required": false,
-      "default": "celsius",
-      "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
-      ]
+      "default": true
     },
     {
-      "key": "poll_frequency",
+      "key": "poll_interval",
       "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
+      "label": {
+        "en": "Interval between two reads of the Domoticz changes (s)",
+        "fr": "Intervalle entre deux lectures des changements Domoticz (s)"
+      },
       "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
+        "en": "Gladys asks Domoticz which devices changed at this pace: 3 seconds keeps the states close to real time.",
+        "fr": "Gladys demande à Domoticz quels appareils ont changé à ce rythme : 3 secondes gardent les états proches du temps réel."
       },
       "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
+      "default": 3,
+      "min": 1,
+      "max": 60
+    },
+    {
+      "key": "sensor_interval",
+      "type": "number",
+      "label": {
+        "en": "Minimum interval between two readings of a sensor (s)",
+        "fr": "Intervalle minimum entre deux mesures d'un capteur (s)"
+      },
+      "description": {
+        "en": "Some devices report every few seconds: Gladys keeps the last reading at this pace. Switches, lights, buttons, motion and opening sensors are never delayed.",
+        "fr": "Certains appareils remontent toutes les quelques secondes : Gladys garde la dernière mesure à ce rythme. Interrupteurs, lumières, boutons, détecteurs de mouvement et d'ouverture ne sont jamais retardés."
+      },
+      "required": false,
+      "default": 10,
+      "min": 0,
+      "max": 300
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
-      "timeout_seconds": 30
-    },
-    {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ]
-    }
-  ],
-  "scene_triggers": [
-    {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
-      "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
-      },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
-        },
-        {
-          "key": "target",
-          "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
-          "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
-          ]
-        }
-      ],
-      "variables": [
-        {
-          "key": "target",
-          "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
-        }
-      ]
-    }
-  ],
-  "scene_actions": [
-    {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
-      },
-      "timeout_seconds": 15,
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ],
-      "outputs": [
-        {
-          "key": "signalled",
-          "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
-        }
-      ]
-    }
-  ],
-  "widgets": [
-    {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
-      "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
-      },
-      "icon": "activity",
-      "action_timeout_seconds": 15
+      "key": "test_connection",
+      "label": { "en": "Test the connection", "fr": "Tester la connexion" },
+      "timeout_seconds": 90
     }
   ]
 }

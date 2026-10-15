@@ -1,0 +1,12 @@
+{
+  "result": [
+    {
+      "Devices": 2,
+      "Name": "Salon",
+      "Order": "2",
+      "idx": "2"
+    }
+  ],
+  "status": "OK",
+  "title": "getplans"
+}

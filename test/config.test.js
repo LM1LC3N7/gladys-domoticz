@@ -1,33 +1,54 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeConfig, DEFAULT_CONFIG } from '../src/config.js';
+import { normalizeConfig, parseDomoticzUrl } from '../src/config.js';
 
-test('normalizeConfig returns the defaults when called with no argument', () => {
-  assert.deepEqual(normalizeConfig(), DEFAULT_CONFIG);
+test('the base address from what the user typed', () => {
+  const url = (raw) => parseDomoticzUrl(raw).url;
+  assert.equal(url('192.168.1.20:8080'), 'http://192.168.1.20:8080');
+  assert.equal(url(' https://domoticz.lan/ '), 'https://domoticz.lan');
+  assert.equal(url('http://box/domoticz/'), 'http://box/domoticz');
+  assert.equal(url('http://box:8080/index.html#/Dashboard'), 'http://box:8080');
+  assert.equal(url('http://box:8080/json.htm?type=command'), 'http://box:8080');
+  assert.equal(parseDomoticzUrl('http://box:8080').origin, 'http://box:8080');
 });
 
-test('normalizeConfig keeps user values over the defaults', () => {
-  const config = normalizeConfig({ latitude: 45.5, longitude: -73.6, unit: 'fahrenheit' });
-  assert.equal(config.latitude, 45.5);
-  assert.equal(config.longitude, -73.6);
-  assert.equal(config.unit, 'fahrenheit');
+test('the addresses refused', () => {
+  assert.deepEqual(parseDomoticzUrl(''), { error: 'empty' });
+  assert.deepEqual(parseDomoticzUrl(undefined), { error: 'empty' });
+  assert.deepEqual(parseDomoticzUrl('ftp://box'), { error: 'invalid' });
+  assert.deepEqual(parseDomoticzUrl('http://'), { error: 'invalid' });
+  assert.deepEqual(parseDomoticzUrl('http://admin:pw@box:8080'), { error: 'credentials' });
 });
 
-test('normalizeConfig coerces numeric strings coming from a form', () => {
-  const config = normalizeConfig({ latitude: '48.8', longitude: '2.3', poll_frequency: '600' });
-  assert.equal(config.latitude, 48.8);
-  assert.equal(config.longitude, 2.3);
-  assert.equal(config.poll_frequency, 600);
-  assert.equal(typeof config.poll_frequency, 'number');
-});
-
-test('normalizeConfig falls back to the default for a missing numeric field', () => {
-  const config = normalizeConfig({ unit: 'celsius' });
-  assert.equal(config.poll_frequency, DEFAULT_CONFIG.poll_frequency);
-});
-
-test('GLADYS_PREFER_LOCAL defaults to true and only an explicit false disables it', () => {
-  assert.equal(normalizeConfig().GLADYS_PREFER_LOCAL, true);
-  assert.equal(normalizeConfig({ GLADYS_PREFER_LOCAL: true }).GLADYS_PREFER_LOCAL, true);
-  assert.equal(normalizeConfig({ GLADYS_PREFER_LOCAL: false }).GLADYS_PREFER_LOCAL, false);
+test('the configuration, normalized: token first, then user, else nothing', () => {
+  assert.deepEqual(normalizeConfig(), {
+    url: undefined,
+    origin: undefined,
+    error: 'empty',
+    auth: { kind: 'none' },
+    verifyCertificate: true,
+    pollInterval: 3,
+    sensorInterval: 10,
+  });
+  const c = normalizeConfig({
+    domoticz_url: 'domoticz.lan:8080',
+    access_token: ' tok ',
+    username: 'gladys',
+    password: 'pw',
+    verify_certificate: false,
+    poll_interval: 0,
+    sensor_interval: 1000,
+  });
+  assert.deepEqual(
+    [c.url, c.error, c.auth, c.verifyCertificate, c.pollInterval, c.sensorInterval],
+    ['http://domoticz.lan:8080', undefined, { kind: 'token', token: 'tok' }, false, 1, 300],
+  );
+  assert.deepEqual(
+    normalizeConfig({ domoticz_url: 'dz', username: ' gladys ', password: ' p w ' }).auth,
+    { kind: 'password', username: 'gladys', password: ' p w ' },
+    'a password is kept as typed',
+  );
+  assert.equal(normalizeConfig({ domoticz_url: 'dz', username: 'gladys' }).error, 'no-password');
+  assert.deepEqual(normalizeConfig({ domoticz_url: 'dz' }).auth, { kind: 'none' });
+  assert.equal(normalizeConfig({ domoticz_url: 'dz', poll_interval: 'x' }).pollInterval, 3);
 });

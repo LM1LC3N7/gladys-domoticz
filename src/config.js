@@ -1,45 +1,90 @@
 // -----------------------------------------------------------------------------
-// Integration configuration.
-//
-// The configuration is filled in by the user in Gladys, from the `config_schema`
-// declared in `gladys-assistant-integration.json`. The SDK fetches it for you
-// (`gladys.getConfig()`) and notifies you of every change through
-// `gladys.onConfigUpdated()`.
-//
-// This module only provides defaults and normalizes the received object, so the
-// rest of the code never has to deal with `undefined`.
+// The configuration of the manifest `config_schema`, normalized.
 // -----------------------------------------------------------------------------
 
-// Defaults: they MUST stay consistent with the `default` values declared in the
-// `config_schema` of the manifest.
-export const DEFAULT_CONFIG = {
-  latitude: 48.8566, // Paris
-  longitude: 2.3522,
-  unit: 'celsius', // 'celsius' | 'fahrenheit'
-  // Seconds between two reads of the polled sensors. Gladys polls at most once
-  // a minute: slower intervals are applied by skipping polls (see
-  // createPoller in src/devices/index.js).
-  poll_frequency: 300,
-  // Reserved key (NOT in config_schema): because the manifest declares both
-  // 'local' and 'cloud' in its `transports` field, Gladys shows a standard
-  // "Prefer the local connection" toggle and sends the user's choice here.
-  // Read-only for the integration; defaults to true.
-  GLADYS_PREFER_LOCAL: true,
+import { POLL_INTERVAL, SENSOR_INTERVAL } from './constants.js';
+
+/** Defaults, mirrored by the manifest (checked by test/manifest.test.js). */
+export const DEFAULTS = {
+  domoticz_url: '',
+  access_token: '',
+  username: '',
+  password: '',
+  verify_certificate: true,
+  poll_interval: POLL_INTERVAL.default,
+  sensor_interval: SENSOR_INTERVAL.default,
 };
 
 /**
- * Merge the user config with the defaults.
- * @param {Record<string, unknown>} raw config returned by the SDK
+ * The base address of Domoticz from what the user typed: "192.168.1.20:8080",
+ * "http://domoticz.lan:8080/", "https://host/domoticz", or a page of its web
+ * interface ("…/index.html", "…/json.htm").
+ * @returns {{ url: string, origin: string } | { error: 'empty' | 'invalid' | 'credentials' }}
  */
+export function parseDomoticzUrl(raw) {
+  const text = String(raw ?? '').trim();
+  if (text === '') {
+    return { error: 'empty' };
+  }
+  const withScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(text) ? text : `http://${text}`;
+  let url;
+  try {
+    url = new URL(withScheme);
+  } catch {
+    return { error: 'invalid' };
+  }
+  if (!['http:', 'https:'].includes(url.protocol) || !url.hostname) {
+    return { error: 'invalid' };
+  }
+  if (url.username || url.password) {
+    // The credentials have their own fields (the password is a secret).
+    return { error: 'credentials' };
+  }
+  const path = url.pathname.replace(/\/(json\.htm|index\.html?)$/i, '').replace(/\/+$/, '');
+  return { url: `${url.origin}${path}`, origin: url.origin };
+}
+
+const bounded = (raw, { min, max, default: fallback }) => {
+  const n = Number(raw);
+  return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : fallback;
+};
+
+/**
+ * How the integration signs in, by order of preference: an access token
+ * (recent Domoticz versions), a user name and password, or nothing when the
+ * Gladys machine is in the trusted networks of Domoticz.
+ */
+function authOf(c) {
+  const token = String(c.access_token ?? '').trim();
+  if (token !== '') {
+    return { kind: 'token', token };
+  }
+  const username = String(c.username ?? '').trim();
+  const password = String(c.password ?? '');
+  if (username !== '') {
+    return { kind: 'password', username, password };
+  }
+  return { kind: 'none' };
+}
+
 export function normalizeConfig(raw = {}) {
+  const given = Object.fromEntries(
+    Object.entries(raw ?? {}).filter(([, v]) => v !== null && v !== undefined && v !== ''),
+  );
+  const c = { ...DEFAULTS, ...given };
+  const target = parseDomoticzUrl(c.domoticz_url);
+  const auth = authOf(c);
+  let error = target.error;
+  if (!error && auth.kind === 'password' && auth.password === '') {
+    error = 'no-password';
+  }
   return {
-    ...DEFAULT_CONFIG,
-    ...raw,
-    // Force the types: config may arrive as strings from a form.
-    latitude: Number(raw.latitude ?? DEFAULT_CONFIG.latitude),
-    longitude: Number(raw.longitude ?? DEFAULT_CONFIG.longitude),
-    poll_frequency: Number(raw.poll_frequency ?? DEFAULT_CONFIG.poll_frequency),
-    // The preference is a boolean; anything but an explicit false means true.
-    GLADYS_PREFER_LOCAL: raw.GLADYS_PREFER_LOCAL !== false,
+    url: target.url,
+    origin: target.origin,
+    error,
+    auth,
+    verifyCertificate: c.verify_certificate !== false,
+    pollInterval: bounded(c.poll_interval, POLL_INTERVAL),
+    sensorInterval: Math.round(bounded(c.sensor_interval, SENSOR_INTERVAL)),
   };
 }
