@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-16
+
 ### Added
 
 - Connection to a Domoticz server (2023.2 or later) through its JSON API, over
@@ -31,3 +33,6 @@ the notes of the version's GitHub Release.
   device is disabled, degraded when Domoticz flags a sensor as timed out.
 - "Test the connection" button: Domoticz version, how Gladys signed in, devices
   and rooms.
+
+[Unreleased]: https://github.com/LM1LC3N7/gladys-domoticz/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/LM1LC3N7/gladys-domoticz/releases/tag/v0.1.1

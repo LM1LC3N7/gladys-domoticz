@@ -1,6 +1,6 @@
 {
   "name": "gladys-domoticz",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Gladys Assistant external integration bridging the devices of a Domoticz server. Unofficial, not affiliated with Domoticz.",
   "type": "module",
