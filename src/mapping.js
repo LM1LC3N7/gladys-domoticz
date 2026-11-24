@@ -300,7 +300,9 @@ class DeviceMapper {
   constructor(record, ctx) {
     this.r = record;
     this.ctx = ctx;
-    this.name = String(record.Name ?? `Domoticz ${record.idx}`).trim();
+    // Never an empty feature name (Gladys and the SDK's fake refuse one): the
+    // fallback of src/inventory.js for a device without a name.
+    this.name = String(record.Name ?? '').trim() || `Domoticz ${record.idx}`;
     this.lang = String(ctx.language ?? '').startsWith('fr') ? 'fr' : 'en';
     this.tempUnit = TEMPERATURE_UNITS[String(ctx.tempSign ?? 'C').toUpperCase()] ?? U.CELSIUS;
     this.features = [];

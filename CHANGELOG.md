@@ -12,8 +12,14 @@ the notes of the version's GitHub Release.
 
 ### Changed
 
+- Integration SDK 0.16.1.
 - README: the store install note replaces the work-in-progress notice, and the
   Releasing section no longer says the store topic is still to be added.
+
+### Fixed
+
+- A Domoticz device without a name gets its features named "Domoticz <idx>"
+  like the device, instead of an empty name that Gladys refuses.
 
 ## [0.1.1] - 2026-10-16
 

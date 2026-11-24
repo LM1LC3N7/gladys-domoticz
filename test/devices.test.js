@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import { buildModel, deviceName } from '../src/devices.js';
 import { asList, buildInventory } from '../src/inventory.js';
 import { answers } from './fixtures/domoticz.js';
+import { assertCoreDevice } from './helpers/coreFeature.js';
 
 const ids = (idx) => ({
   device: `ext:test:domoticz:${idx}`,
@@ -69,4 +70,26 @@ test('the Gladys devices: one per Domoticz device, room in the name, params', ()
   assert.ok(model.throttled.has('ext:test:domoticz:16:temperature'));
   assert.equal(model.deviceIdx.get('ext:test:domoticz:16'), '16');
   assert.equal(deviceName({ name: 'x'.repeat(120) }).length, 100);
+});
+
+test('every feature of every device has a numeric min and max and the other core fields', () => {
+  let features = 0;
+  for (const ctx of [
+    { tempSign: 'C', windSign: 'm/s', language: 'en' },
+    { tempSign: 'F', windSign: 'mph', language: 'fr' },
+    { tempSign: 'X', windSign: 'kn' },
+  ]) {
+    const model = buildModel(ids, inventory(), ctx);
+    for (const device of model.devices) {
+      features += assertCoreDevice(device, device.external_id);
+    }
+  }
+  assert.ok(features > 3 * 56, `${features} features`);
+  // A record without a name: its features are still named.
+  const unnamed = answers().getdevices.result.map((r) => ({ ...r, Name: ' ' }));
+  const model = buildModel(ids, buildInventory({ devices: { result: unnamed } }));
+  assert.ok(model.devices.length > 0);
+  for (const device of model.devices) {
+    assertCoreDevice(device, device.external_id);
+  }
 });
