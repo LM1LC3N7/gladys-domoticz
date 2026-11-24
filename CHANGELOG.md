@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-11-24
+
 ### Changed
 
 - Integration SDK 0.16.1.
@@ -54,5 +56,6 @@ the notes of the version's GitHub Release.
 - "Test the connection" button: Domoticz version, how Gladys signed in, devices
   and rooms.
 
-[Unreleased]: https://github.com/LM1LC3N7/gladys-domoticz/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/LM1LC3N7/gladys-domoticz/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/LM1LC3N7/gladys-domoticz/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/LM1LC3N7/gladys-domoticz/releases/tag/v0.1.1
