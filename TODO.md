@@ -105,3 +105,7 @@ up to date at the end of every milestone.
 - **Fresh Domoticz quirk** (e2e only): after the setup wizard creates the
   admin, the https server only knows it after a restart; `domoticz-e2e.sh up`
   restarts the container.
+
+## Next patch
+
+- Migration review minors: see `_lots/migration-reviews/w11-gladys-domoticz-r2.md`.
