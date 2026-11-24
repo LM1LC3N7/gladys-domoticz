@@ -161,8 +161,8 @@ test('the Gladys commands run the Domoticz API, the new state is read soon after
       params: { idx: '41', hex: '0000ff', brightness: 80, iswhite: 'false' },
     },
   ]);
-  assert.deepEqual(await run('Serrure garage', 'binary', 0), [
-    { param: 'switchlight', params: { idx: '106', switchcmd: 'On' } },
+  assert.deepEqual(await run('Serrure garage', 'binary', 1), [
+    { param: 'switchlight', params: { idx: '106', switchcmd: 'Off' } },
   ]);
 
   const sensor = deviceNamed(gladys, 'Température (Salon)');
@@ -323,4 +323,69 @@ test('Scan reads the inventory again, a new configuration reconnects', async (t)
   assert.equal(box.clients[0].closed, true);
   assert.equal(box.clients.at(-1).config.url, 'https://dz.lan');
   assert.equal(gladys.fake.connectionStatus.connected, true);
+});
+
+test('unlocking needs allow_unlock, locking never does', async (t) => {
+  const { gladys, box, app } = await setup(t);
+  const send = async (name, value) => {
+    const device = deviceNamed(gladys, name);
+    const before = box.executed.length;
+    const ack = await gladys.fake.setValue(device, featureOf(device, 'binary'), value);
+    return { ack, sent: box.executed.slice(before) };
+  };
+  for (const name of ['Serrure', 'Serrure garage']) {
+    for (const value of [0, -1, 'x', null]) {
+      const { ack, sent } = await send(name, value);
+      assert.equal(ack.success, false, `${name} ${value}`);
+      assert.match(ack.error, /Unlocking .* is turned off/);
+      assert.deepEqual(sent, [], `${name} ${value}: nothing sent`);
+    }
+    const locked = await send(name, 1);
+    assert.equal(locked.ack.success, true, `${name}: locking is always allowed`);
+    assert.equal(locked.sent.length, 1);
+  }
+
+  // The option turned off between the writer and the call: still refused.
+  const device = deviceNamed(gladys, 'Serrure');
+  app.config = { ...app.config, allowUnlock: true };
+  const writer = app.model.writers.get(featureOf(device, 'binary').external_id);
+  const write = writer.write;
+  writer.write = (...args) => {
+    app.config = { ...app.config, allowUnlock: false };
+    return write(...args);
+  };
+  const late = await send('Serrure', 0);
+  writer.write = write;
+  assert.equal(late.ack.success, false);
+  assert.deepEqual(late.sent, []);
+});
+
+test('with allow_unlock, unlocking is sent (normal and inverted lock)', async (t) => {
+  const { gladys, box } = await setup(t, { ...CONFIG, allow_unlock: true });
+  const run = async (name, value) => {
+    const device = deviceNamed(gladys, name);
+    const before = box.executed.length;
+    const ack = await gladys.fake.setValue(device, featureOf(device, 'binary'), value);
+    assert.equal(ack.success, true, `${name}: ${ack.error}`);
+    return box.executed.slice(before).map((c) => c.params.switchcmd);
+  };
+  assert.deepEqual(await run('Serrure', 0), ['Off']);
+  assert.deepEqual(await run('Serrure garage', 0), ['On']);
+});
+
+test('a setpoint outside its published range is refused, nothing sent', async (t) => {
+  const { gladys, box } = await setup(t);
+  const device = deviceNamed(gladys, 'Consigne');
+  const feature = featureOf(device, 'setpoint');
+  for (const value of [feature.max + 0.5, 99, feature.min - 0.5, -40]) {
+    const before = box.executed.length;
+    const ack = await gladys.fake.setValue(device, feature, value);
+    assert.equal(ack.success, false, `${value}`);
+    assert.match(ack.error, /outside/);
+    assert.equal(box.executed.length, before);
+  }
+  for (const value of [feature.min, feature.max]) {
+    const ack = await gladys.fake.setValue(device, feature, value);
+    assert.equal(ack.success, true, `${value}: ${ack.error}`);
+  }
 });

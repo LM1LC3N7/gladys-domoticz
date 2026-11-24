@@ -27,6 +27,7 @@ test('the configuration, normalized: token first, then user, else nothing', () =
     error: 'empty',
     auth: { kind: 'none' },
     verifyCertificate: true,
+    allowUnlock: false,
     pollInterval: 3,
     sensorInterval: 10,
   });
@@ -51,4 +52,13 @@ test('the configuration, normalized: token first, then user, else nothing', () =
   assert.equal(normalizeConfig({ domoticz_url: 'dz', username: 'gladys' }).error, 'no-password');
   assert.deepEqual(normalizeConfig({ domoticz_url: 'dz' }).auth, { kind: 'none' });
   assert.equal(normalizeConfig({ domoticz_url: 'dz', poll_interval: 'x' }).pollInterval, 3);
+});
+
+test('allow_unlock: only true (or "true") allows', () => {
+  for (const value of [true, 'true']) {
+    assert.equal(normalizeConfig({ allow_unlock: value }).allowUnlock, true, String(value));
+  }
+  for (const value of [false, 'false', 1, '1', 'yes', {}, null, undefined, '']) {
+    assert.equal(normalizeConfig({ allow_unlock: value }).allowUnlock, false, String(value));
+  }
 });

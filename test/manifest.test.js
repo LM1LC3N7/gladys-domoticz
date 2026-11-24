@@ -70,6 +70,8 @@ test('the configuration matches the code', () => {
     }
   }
   assert.equal(fields.access_token.type, 'secret');
+  assert.equal(fields.allow_unlock.type, 'boolean');
+  assert.equal(fields.allow_unlock.default, false);
   assert.equal(fields.password.type, 'secret');
   assert.equal(fields.domoticz_url.required, true);
   assert.deepEqual(

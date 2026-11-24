@@ -51,6 +51,10 @@ test/helpers/       a fake Domoticz; Gladys is the SDK's fake
 
 ## Rules
 
+- **Unlocking needs `allow_unlock`** (off by default): a writer that can
+  unlock declares `unlocks(value)` (src/mapping.js), and `setValue` refuses it
+  without the option, checked again just before each call. Locking is never
+  blocked. Setpoints are refused outside their published min/max.
 - **Features follow the core model.** Every feature has a non-empty `name`, a
   numeric `min` and `max` (0/0 for text), boolean `read_only` and
   `has_feedback`: Gladys refuses it otherwise, and the SDK's fake Gladys

@@ -217,6 +217,13 @@ test('locks: 1 = locked, the inverted ones lock with Off', () => {
   assert.deepEqual(inverted.write('binary', 0), [
     { param: 'switchlight', params: { switchcmd: 'On' } },
   ]);
+  // Unlocking is marked (refused without allow_unlock by src/app.js).
+  for (const mapped of [lock.mapped, inverted.mapped]) {
+    const { unlocks } = mapped.writers.binary;
+    assert.deepEqual([0, -1, 'x', null, undefined].map(unlocks), [true, true, true, true, true]);
+    assert.deepEqual([1, 2, '1'].map(unlocks), [false, false, false]);
+  }
+  assert.equal(map('Lampe salon').mapped.writers.binary.unlocks, undefined);
 });
 
 test('setpoints: a thermostat target, sensible bounds instead of -200…200', () => {

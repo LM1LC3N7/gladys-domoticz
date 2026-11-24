@@ -319,9 +319,15 @@ class DeviceMapper {
    * One feature.
    * @param {string} key part of the external id: never change it
    * @param {object} spec category, type, unit, min, max, supported_options
-   * @param {{ read?: Function, write?: Function, text?: boolean, throttle?: boolean, event?: boolean }} io
+   * @param {{ read?: Function, write?: Function, unlocks?: Function, text?: boolean, throttle?: boolean, event?: boolean }} io
+   *   `unlocks(value)`: true when writing `value` unlocks (needs allow_unlock, src/app.js)
    */
-  add(key, name, spec, { read, write, text = false, throttle = false, event = false } = {}) {
+  add(
+    key,
+    name,
+    spec,
+    { read, write, unlocks, text = false, throttle = false, event = false } = {},
+  ) {
     if (this.features.some((f) => f.key === key)) {
       return;
     }
@@ -348,7 +354,7 @@ class DeviceMapper {
       this.readers.push({ key, read, event });
     }
     if (write) {
-      this.writers[key] = { write, text };
+      this.writers[key] = unlocks ? { write, text, unlocks } : { write, text };
     }
     if (throttle) {
       this.throttled.add(key);
@@ -624,6 +630,9 @@ class DeviceMapper {
           }
           return /^unlocked$/i.test(status) ? { state: 0 } : null;
         },
+        // Anything but a positive number unlocks: refused without allow_unlock
+        // (src/app.js checks `unlocks` before sending). Locking is always allowed.
+        unlocks: (value) => !(Number(value) > 0),
         // A Door Lock locks with On; a Door Lock Inverted with Off.
         write: (value) => {
           const lock = Number(value) > 0;
@@ -786,6 +795,10 @@ class DeviceMapper {
           const n = Number(value);
           if (!Number.isFinite(n)) {
             throw new Error(`${value} is not a temperature`);
+          }
+          // The core does not bound a setValue: a scene or the API may send anything.
+          if (n < min || n > max) {
+            throw new Error(`${n} is outside ${min}…${max} for ${this.name}`);
           }
           return [{ param: 'setsetpoint', params: { setpoint: n } }];
         },

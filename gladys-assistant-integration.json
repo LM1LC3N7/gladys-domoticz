@@ -130,6 +130,20 @@
       "default": 10,
       "min": 0,
       "max": 300
+    },
+    {
+      "key": "allow_unlock",
+      "type": "boolean",
+      "label": {
+        "en": "Allow unlocking from Gladys",
+        "fr": "Autoriser le déverrouillage depuis Gladys"
+      },
+      "description": {
+        "en": "Off by default: Gladys shows the Domoticz locks and can lock them, never unlocks them. On, Gladys can UNLOCK, from the dashboard, scenes and voice assistants.",
+        "fr": "Désactivé par défaut : Gladys affiche les serrures Domoticz et peut les verrouiller, jamais les déverrouiller. Activé, Gladys peut DÉVERROUILLER, depuis le tableau de bord, les scènes et les assistants vocaux."
+      },
+      "required": false,
+      "default": false
     }
   ],
   "actions": [

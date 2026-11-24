@@ -21,7 +21,7 @@ ou utilisez les deux côte à côte. Non officiel, sans lien avec Domoticz.
 | Interrupteur couleur (RGB, RGBW, RGBWW, blanc CW/WW)                                                    | une lumière : allumage, luminosité, couleur, température de couleur      |
 | Volets, volets + stop, stores vénitiens, volets pourcentage (+ stop)                                    | un volet : ouvrir, fermer, stop, position                                |
 | Sélecteur                                                                                               | une liste de ses niveaux                                                 |
-| Serrure, serrure inversée                                                                               | une serrure                                                              |
+| Serrure, serrure inversée                                                                               | une serrure (déverrouiller demande l'option plus bas)                    |
 | Sirène X10                                                                                              | une sirène                                                               |
 | Bouton poussoir (Push On / Push Off), sonnette                                                          | un bouton (chaque appui est un événement pour vos scènes)                |
 | Contact, contact de porte, détecteur de mouvement, détecteur de fumée, capteur crépuscule               | capteurs d'ouverture, de mouvement, de fumée                             |
@@ -87,6 +87,13 @@ machine Gladys fait partie des **réseaux de confiance** de Domoticz
   défaut (0 à 300). Un compteur qui remonte toutes les quelques secondes est
   envoyé à Gladys à ce rythme. Interrupteurs, lumières, boutons, détecteurs de
   mouvement et d'ouverture ne sont jamais retardés.
+- **Autoriser le déverrouillage depuis Gladys** : désactivé par défaut. Gladys
+  affiche les serrures Domoticz et peut toujours les verrouiller, mais refuse
+  de les déverrouiller (tableau de bord, scènes, assistants vocaux) tant que
+  cette option n'est pas cochée.
+
+Une consigne de thermostat hors de la plage affichée dans Gladys (celle de
+Domoticz, ou 5 à 30 °C / 41 à 86 °F) est refusée, rien n'est envoyé à Domoticz.
 
 ## Bon à savoir
 

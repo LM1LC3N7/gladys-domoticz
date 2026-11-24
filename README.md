@@ -66,7 +66,7 @@ the switch and meter type tables, the `lastupdate` filter, the sign-in rules.
 
 ```bash
 npm install
-npm test                                        # node --test, no network
+npm test                                        # node --test --test-timeout=60000, no network
 npm run lint && npm run format:check
 npm run audit
 npx github:GladysAssistant/integration-store .  # store admission checks

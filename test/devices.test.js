@@ -84,7 +84,7 @@ test('every feature of every device has a numeric min and max and the other core
       features += assertCoreDevice(device, device.external_id);
     }
   }
-  assert.ok(features > 3 * 56, `${features} features`);
+  assert.equal(features, 3 * 78);
   // A record without a name: its features are still named.
   const unnamed = answers().getdevices.result.map((r) => ({ ...r, Name: ' ' }));
   const model = buildModel(ids, buildInventory({ devices: { result: unnamed } }));

@@ -46,6 +46,12 @@ up to date at the end of every milestone.
 
 ## Decisions
 
+- **Unlocking needs `allow_unlock`** (off by default, 2026-11, review w11 r1):
+  the house safety rule, as in the other bridges (fibaro, homey). Anything but
+  a positive value unlocks, for a normal or an inverted lock; checked before
+  the writer and again just before each Domoticz call. Locking is never
+  blocked. A thermostat setpoint outside the published min/max is refused
+  (not clamped: a scene asking 99 °C is a mistake to show, not to round).
 - **Own client, no dependency**: no maintained JavaScript client of the
   Domoticz API exists (npm `domoticz-api` 2015, `domoticz-js` 2015,
   `domoticz-api-linker` 2022, `mydomoathome` a GPL gateway with ~20

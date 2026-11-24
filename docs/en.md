@@ -20,7 +20,7 @@ Unofficial, not affiliated with Domoticz.
 | Colour switch (RGB, RGBW, RGBWW, white CW/WW)                                   | a light: on/off, brightness, colour, colour temperature        |
 | Blinds, Blinds + Stop, Venetian blinds, Blinds percentage (+ Stop)              | a shutter: open, close, stop, position                         |
 | Selector                                                                        | a list of its levels                                           |
-| Door lock, door lock inverted                                                   | a lock                                                         |
+| Door lock, door lock inverted                                                   | a lock (unlocking needs the option below)                      |
 | X10 siren                                                                       | a siren                                                        |
 | Push On / Push Off button, doorbell                                             | a button (every press is an event for your scenes)             |
 | Contact, door contact, motion sensor, smoke detector, dusk sensor               | opening, motion and smoke sensors                              |
@@ -78,6 +78,12 @@ in the **trusted networks** of Domoticz (**Setup → Settings → Security**).
   (0 to 300). A meter that reports every few seconds is sent to Gladys at this
   pace. Switches, lights, buttons, motion and opening sensors are never
   delayed.
+- **Allow unlocking from Gladys**: off by default. Gladys shows the Domoticz
+  locks and can always lock them, but refuses to unlock them (from the
+  dashboard, scenes or voice assistants) until you tick this option.
+
+A thermostat setpoint outside the range shown in Gladys (the Domoticz one, or
+5 to 30 °C / 41 to 86 °F) is refused, nothing is sent to Domoticz.
 
 ## Good to know
 

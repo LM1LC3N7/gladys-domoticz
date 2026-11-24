@@ -13,6 +13,7 @@ export const DEFAULTS = {
   verify_certificate: true,
   poll_interval: POLL_INTERVAL.default,
   sensor_interval: SENSOR_INTERVAL.default,
+  allow_unlock: false,
 };
 
 /**
@@ -84,6 +85,8 @@ export function normalizeConfig(raw = {}) {
     error,
     auth,
     verifyCertificate: c.verify_certificate !== false,
+    // Only `true` (or the text "true") allows unlocking: anything else refuses.
+    allowUnlock: c.allow_unlock === true || c.allow_unlock === 'true',
     pollInterval: bounded(c.poll_interval, POLL_INTERVAL),
     sensorInterval: Math.round(bounded(c.sensor_interval, SENSOR_INTERVAL)),
   };

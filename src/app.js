@@ -518,16 +518,29 @@ export class DomoticzApp {
     }
     const record = this.records.get(idx);
     if (record?.Protected === true) {
+      const name = this.known.get(idx) ?? `Domoticz ${idx}`;
       throw new Error(
-        `${record.Name} is protected by a code in Domoticz: remove the protection to control it from Gladys`,
+        `${name} is protected by a code in Domoticz: remove the protection to control it from Gladys`,
       );
     }
+    this.checkUnlock(writer, value, feature);
     const calls = writer.write(value, record);
     for (const { param, params } of calls) {
+      // Checked again just before sending: the configuration may have changed.
+      this.checkUnlock(writer, value, feature);
       await client.call(param, { idx, ...params });
     }
     this.logger.debug(`${calls.length} Domoticz command(s) sent for ${feature.external_id}`);
     this.pollSoon();
+  }
+
+  /** Unlocking needs the allow_unlock option; locking never does. */
+  checkUnlock(writer, value, feature) {
+    if (writer.unlocks?.(value) && this.config.allowUnlock !== true) {
+      throw new Error(
+        `Unlocking ${feature.name ?? feature.external_id} is turned off: tick "Allow unlocking from Gladys" in the integration settings`,
+      );
+    }
   }
 
   // --- Configuration screen button ---------------------------------------------------

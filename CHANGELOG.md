@@ -13,13 +13,22 @@ the notes of the version's GitHub Release.
 ### Changed
 
 - Integration SDK 0.16.1.
+- **Unlocking needs the new "Allow unlocking from Gladys" option (off by
+  default).** If you unlocked Domoticz locks from Gladys, tick it in the
+  integration settings to keep doing so. Locking is always allowed.
+- A thermostat setpoint outside the range shown in Gladys is refused instead
+  of being sent to Domoticz.
 - README: the store install note replaces the work-in-progress notice, and the
   Releasing section no longer says the store topic is still to be added.
+- Development only: Prettier, `actions/setup-node` 7 and
+  `docker/setup-qemu-action` 4 (Dependabot, now grouped monthly).
 
 ### Fixed
 
 - A Domoticz device without a name gets its features named "Domoticz <idx>"
   like the device, instead of an empty name that Gladys refuses.
+- The "protected by a code" error names a device without a name
+  "Domoticz <idx>" instead of starting with "is protected".
 
 ## [0.1.1] - 2026-10-16
 
